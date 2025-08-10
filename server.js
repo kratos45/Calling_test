@@ -1,9 +1,14 @@
+const http = require('http');
 const WebSocket = require('ws');
 
-// Use the port Railway provides or default to 3000 locally
 const PORT = process.env.PORT || 3000;
 
-const wss = new WebSocket.Server({ port: PORT });
+const server = http.createServer((req, res) => {
+  res.writeHead(200);
+  res.end('WebSocket signaling server running\n');
+});
+
+const wss = new WebSocket.Server({ server });
 
 let clients = [];
 
@@ -12,17 +17,11 @@ wss.on('connection', function connection(ws) {
   console.log('Client connected. Total clients:', clients.length);
 
   ws.on('message', function incoming(message) {
-    // Broadcast the received message to all other clients (except sender)
     clients.forEach(client => {
       if (client !== ws && client.readyState === WebSocket.OPEN) {
         client.send(message);
       }
     });
-
-    // If you want loopback (send message back to sender), uncomment below:
-    // if (ws.readyState === WebSocket.OPEN) {
-    //   ws.send(message);
-    // }
   });
 
   ws.on('close', () => {
@@ -31,4 +30,6 @@ wss.on('connection', function connection(ws) {
   });
 });
 
-console.log(`Signaling server running on ws://localhost:${PORT}`);
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
