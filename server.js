@@ -1,3 +1,4 @@
+console.log("server.js is starting...");
 const http = require('http');
 const WebSocket = require('ws');
 
